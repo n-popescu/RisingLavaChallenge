@@ -6,10 +6,19 @@ authors: [ doughston ]
 commands:
   startlava:
     description: Starts the lava rising challenge
-    usage: /startlava
+    usage: /startlava <timeInSeconds> <worldSizeX> <worldSizeZ> <startDelayInSeconds> [startLayer]
   stoplava:
     description: Stops the lava rising challenge
     usage: /stoplava
   setborder:
     description: Sets the world border
     usage: /setborder <worldSizeX> <worldSizeZ>
+  pauselava:
+    description: Pauses the lava rising challenge
+    usage: /pauselava
+  resumelava:
+    description: Resumes the lava rising challenge
+    usage: /resumelava
+  help:
+    description: Displays help information
+    usage: /help

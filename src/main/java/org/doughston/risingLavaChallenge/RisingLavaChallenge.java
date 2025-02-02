@@ -31,6 +31,9 @@ public final class RisingLavaChallenge extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("startlava")).setExecutor(this);
         Objects.requireNonNull(this.getCommand("stoplava")).setExecutor(this);
         Objects.requireNonNull(this.getCommand("setborder")).setExecutor(this);
+        Objects.requireNonNull(this.getCommand("pauselava")).setExecutor(this);
+        Objects.requireNonNull(this.getCommand("resumelava")).setExecutor(this);
+        Objects.requireNonNull(this.getCommand("help")).setExecutor(this);
     }
 
     @Override
@@ -39,7 +42,7 @@ public final class RisingLavaChallenge extends JavaPlugin {
         stopLavaRisingTask();
     }
 
-    private void startLavaRisingTask(Player player, int startLayer) {
+    private void startLavaRisingTask(Player player, int startLayer, long startDelayTicks) {
         if (lavaTask != null) {
             lavaTask.cancel();
         }
@@ -72,7 +75,7 @@ public final class RisingLavaChallenge extends JavaPlugin {
                 }.runTaskLater(RisingLavaChallenge.this, 200L); // 10 seconds later
             }
         };
-        lavaTask.runTaskTimer(this, 0L, intervalTicks); // Run task at the specified interval
+        lavaTask.runTaskTimer(this, startDelayTicks, intervalTicks); // Run task at the specified interval
     }
 
     private void stopLavaRisingTask() {
@@ -98,24 +101,25 @@ public final class RisingLavaChallenge extends JavaPlugin {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
         if (command.getName().equalsIgnoreCase("startlava")) {
             if (sender instanceof Player || sender instanceof ConsoleCommandSender) {
-                if (args.length == 3 || args.length == 4) {
+                if (args.length == 4 || args.length == 5) {
                     try {
                         int timeInSeconds = Integer.parseInt(args[0]);
                         worldSizeX = Integer.parseInt(args[1]);
                         worldSizeZ = Integer.parseInt(args[2]);
                         intervalTicks = timeInSeconds * 20L; // Convert seconds to ticks
-                        int startLayer = (args.length == 4) ? Integer.parseInt(args[3]) : -3;
+                        long startDelayTicks = Long.parseLong(args[3]) * 20L; // Convert seconds to ticks
+                        int startLayer = (args.length == 5) ? Integer.parseInt(args[4]) : -3;
                         if (sender instanceof Player) {
-                            startLavaRisingTask((Player) sender, startLayer);
+                            startLavaRisingTask((Player) sender, startLayer, startDelayTicks);
                         }
-                        sender.sendMessage("Lava rising challenge started with world size " + worldSizeX + "x" + worldSizeZ + ", interval " + (intervalTicks / 20) + " seconds, and starting layer " + startLayer + "!");
+                        sender.sendMessage("Lava rising challenge started with world size " + worldSizeX + "x" + worldSizeZ + ", interval " + (intervalTicks / 20) + " seconds, start delay " + (startDelayTicks / 20) + " seconds, and starting layer " + startLayer + "!");
                         return true;
                     } catch (NumberFormatException e) {
-                        sender.sendMessage("Invalid arguments. Please provide three or four integers.");
+                        sender.sendMessage("Invalid arguments. Please provide four or five integers.");
                         return false;
                     }
                 } else {
-                    sender.sendMessage("Invalid number of arguments. Usage: /startlava <timeInSeconds> <worldSizeX> <worldSizeZ> [startLayer]");
+                    sender.sendMessage("Invalid number of arguments. Usage: /startlava <timeInSeconds> <worldSizeX> <worldSizeZ> <startDelayInSeconds> [startLayer]");
                     return false;
                 }
             }
@@ -143,6 +147,16 @@ public final class RisingLavaChallenge extends JavaPlugin {
                     return false;
                 }
             }
+        } else if (command.getName().equalsIgnoreCase("help")) {
+            sender.sendMessage("""
+                    Available commands:
+                    /startlava <timeInSeconds> <worldSizeX> <worldSizeZ> <startDelayInSeconds> [startLayer] - Starts the lava rising challenge
+                    /stoplava - Stops the lava rising challenge
+                    /setborder <worldSizeX> <worldSizeZ> - Sets the world border
+                    /pauselava - Pauses the lava rising challenge
+                    /resumelava - Resumes the lava rising challenge
+                    /help - Displays this help message""");
+            return true;
         }
         return false;
     }
